@@ -60,9 +60,8 @@ Dabei dürfen definierte Variablen wie Datum, Vertretung, E-Mail-Adresse oder Te
 - [Beispielhafter Ablauf](#abschnitt-46)
 - [Empfohlene Inbetriebnahme](#abschnitt-47)
 - [Status des Projekts](#abschnitt-48)
-- [PowerShell 7 einrichten](#abschnitt-49)
-- [Lizenz](#abschnitt-50)
-- [Haftungshinweis](#abschnitt-51)
+- [Lizenz](#abschnitt-49)
+- [Haftungshinweis](#abschnitt-50)
 
 ---
 
@@ -714,7 +713,7 @@ Für SMTP-Benachrichtigungen wird zusätzlich ein erreichbarer SMTP-Server bzw. 
 
 ## Build und Bereitstellung
 
-Die folgenden Schritte benötigen PowerShell 7. Eine kurze Anleitung dazu steht am Ende dieser README im Abschnitt **PowerShell 7 einrichten**.
+Die folgenden Schritte benötigen PowerShell 7. Installation, Auffinden und Kompilierbefehle sind in der separaten [README zu PowerShell 7](README-PS7.md) beschrieben.
 
 <a id="abschnitt-31"></a>
 
@@ -1009,44 +1008,6 @@ Vor einem produktiven Rollout sollte die Anwendung immer zunächst mit einem Tes
 
 <a id="abschnitt-49"></a>
 
-## PowerShell 7 einrichten
-
-PowerShell 7 wird zusätzlich zur Windows PowerShell 5.1 installiert. Ein bereits geöffnetes Fenster bleibt bei seiner bisherigen Version.
-
-**Installieren:**
-
-```powershell
-winget install --id Microsoft.PowerShell --exact --source winget
-```
-
-**Danach ein neues Terminal öffnen, PowerShell 7 starten und die Version prüfen:**
-
-```powershell
-pwsh -NoProfile
-$PSVersionTable.PSVersion
-```
-
-Bei `Major = 7` ist die richtige Version geöffnet. Wird `pwsh` nicht gefunden, je nach Installation einen dieser Pfade verwenden:
-
-```powershell
-& "$env:ProgramFiles\PowerShell\7\pwsh.exe"
-# Alternativ bei der hier verwendeten WindowsApps-Installation:
-& "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe\pwsh.exe"
-```
-
-Falls beide Pfade fehlen, Installation und Speicherort prüfen:
-
-```powershell
-winget list --id Microsoft.PowerShell
-where.exe /R "$env:LOCALAPPDATA" pwsh.exe
-```
-
-Weitere Installationsmöglichkeiten: [Microsoft – PowerShell unter Windows installieren](https://learn.microsoft.com/de-de/powershell/scripting/install/installing-powershell-on-windows).
-
----
-
-<a id="abschnitt-50"></a>
-
 ## Lizenz
 
 MIT
@@ -1054,7 +1015,7 @@ MIT
 
 ---
 
-<a id="abschnitt-51"></a>
+<a id="abschnitt-50"></a>
 
 ## Haftungshinweis
 
@@ -1069,5 +1030,3 @@ Vor dem produktiven Einsatz sollten:
 - geeignete Sicherungs- und Betriebsprozesse festgelegt werden
 
 Der Einsatz erfolgt in Verantwortung des jeweiligen Administrators.
-
-
