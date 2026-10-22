@@ -1,14 +1,76 @@
-# Abwesenheits Manager
+# AbwesenheitsManager
 
 Zentrale Verwaltung und automatische Pflege von Abwesenheitsnotizen in Microsoft Exchange Online.
 
-Der **Abwesenheits Manager** ist eine Windows-Anwendung für Unternehmen, die einheitliche interne und externe Abwesenheitsnotizen in Microsoft 365 bereitstellen und automatisch überwachen möchten.
+Der **AbwesenheitsManager** ist eine Windows-Anwendung für Unternehmen, die einheitliche interne und externe Abwesenheitsnotizen in Microsoft 365 bereitstellen und automatisch überwachen möchten.
 
-Die Anwendung besteht aus einer grafischen Administrationsoberfläche und einem Windows-Dienst. Sie prüft Exchange-Online-Postfächer regelmäßig und stellt definierte Standardvorlagen wieder her, wenn feste Bestandteile einer Abwesenheitsnotiz verändert oder entfernt wurden.
+Die Anwendung besteht aus einer grafischen Administrationsoberfläche, einem Windows-Dienst und einer Tray-Anwendung. Sie prüft Exchange-Online-Postfächer regelmäßig und stellt definierte Standardvorlagen wieder her, wenn feste Bestandteile einer Abwesenheitsnotiz verändert oder entfernt wurden.
 
 Dabei dürfen definierte Variablen wie Datum, Vertretung, E-Mail-Adresse oder Telefonnummer individuell durch Mitarbeiter angepasst werden.
 
 ---
+
+## Inhaltsverzeichnis
+
+- [Ziel des Projekts](#abschnitt-1)
+- [Funktionsumfang](#abschnitt-2)
+  - [Zentrale Abwesenheitsvorlagen](#abschnitt-3)
+  - [Frei definierbare Variablen](#abschnitt-4)
+  - [Intelligente Vorlagenprüfung](#abschnitt-5)
+  - [Schutz aktiver Abwesenheitsnotizen](#abschnitt-6)
+  - [Getrennte Prüfung von intern und extern](#abschnitt-7)
+- [Dry-Run / Testmodus](#abschnitt-8)
+- [Mailbox-Ausnahmen](#abschnitt-9)
+- [Automatischer Betrieb](#abschnitt-10)
+  - [Admin-Anwendung](#abschnitt-11)
+  - [Tray-Anwendung](#abschnitt-12)
+  - [Windows-Dienst](#abschnitt-13)
+- [Microsoft 365 / Exchange Online](#abschnitt-14)
+- [Zertifikatsauthentifizierung](#abschnitt-15)
+  - [Zertifikatsüberwachung](#abschnitt-16)
+- [SMTP-Benachrichtigungen](#abschnitt-17)
+  - [Sammelbenachrichtigungen](#abschnitt-18)
+- [Sichere Speicherung von SMTP-Zugangsdaten](#abschnitt-19)
+- [Logging](#abschnitt-20)
+- [Konfigurationsdaten](#abschnitt-21)
+- [Projektstruktur](#abschnitt-22)
+  - [AbwesenheitsManager.Admin](#abschnitt-23)
+  - [AbwesenheitsManager.Service](#abschnitt-24)
+  - [AbwesenheitsManager.Core](#abschnitt-25)
+  - [AbwesenheitsManager.Exchange](#abschnitt-26)
+  - [AbwesenheitsManager.Tests](#abschnitt-27)
+- [Technologien](#abschnitt-28)
+- [Voraussetzungen](#abschnitt-29)
+- [Installation, PowerShell 7 und Build](#abschnitt-30)
+  - [1. Quellcode entpacken und Solution-Ordner finden](#abschnitt-31)
+  - [2. PowerShell-Version prüfen](#abschnitt-32)
+  - [3. PowerShell 7 installieren](#abschnitt-33)
+  - [4. PowerShell 7 öffnen oder auffinden](#abschnitt-34)
+  - [5. .NET SDK prüfen](#abschnitt-35)
+  - [6. In den Solution-Ordner wechseln](#abschnitt-36)
+  - [7. Alle Programme in einer Ausführung erstellen](#abschnitt-37)
+  - [8. Optional: Solution bauen und Schutztests ausführen](#abschnitt-38)
+  - [9. Programme bereitstellen und Tray starten](#abschnitt-39)
+  - [Häufige Fehlermeldungen](#abschnitt-40)
+- [Sicherheitskonzept](#abschnitt-41)
+  - [Aktive automatische Antworten](#abschnitt-42)
+  - [Dry-Run](#abschnitt-43)
+  - [Zweite Prüfung vor Änderungen](#abschnitt-44)
+  - [Getrennte Vorlagenprüfung](#abschnitt-45)
+  - [Zertifikatsauthentifizierung](#abschnitt-46)
+  - [DPAPI](#abschnitt-47)
+  - [Ausschlussliste](#abschnitt-48)
+- [Bekannte technische Grenze](#abschnitt-49)
+- [Beispielhafter Ablauf](#abschnitt-50)
+- [Empfohlene Inbetriebnahme](#abschnitt-51)
+- [Status des Projekts](#abschnitt-52)
+- [Lizenz](#abschnitt-53)
+- [Haftungshinweis](#abschnitt-54)
+
+---
+
+
+<a id="abschnitt-1"></a>
 
 ## Ziel des Projekts
 
@@ -20,7 +82,7 @@ In vielen Unternehmen werden Abwesenheitsnotizen individuell formuliert. Dadurch
 - uneinheitliche interne und externe Kommunikation
 - versehentlich gelöschte Pflichtinformationen
 
-Der Abwesenheits Manager stellt eine zentrale Vorlage bereit, ohne die Mitarbeiter bei der Pflege ihrer individuellen Urlaubsdaten unnötig einzuschränken.
+Der AbwesenheitsManager stellt eine zentrale Vorlage bereit, ohne die Mitarbeiter bei der Pflege ihrer individuellen Urlaubsdaten unnötig einzuschränken.
 
 Das System unterscheidet zwischen:
 
@@ -29,7 +91,11 @@ Das System unterscheidet zwischen:
 
 ---
 
+<a id="abschnitt-2"></a>
+
 ## Funktionsumfang
+
+<a id="abschnitt-3"></a>
 
 ### Zentrale Abwesenheitsvorlagen
 
@@ -50,6 +116,8 @@ Beispiel:
 Interne und externe Texte können unabhängig voneinander verwaltet werden.
 
 ---
+
+<a id="abschnitt-4"></a>
 
 ### Frei definierbare Variablen
 
@@ -81,6 +149,8 @@ Damit kann beispielsweise für eine E-Mail-Adresse zusätzlich geprüft werden, 
 
 ---
 
+<a id="abschnitt-5"></a>
+
 ### Intelligente Vorlagenprüfung
 
 Die Anwendung vergleicht eine bestehende Abwesenheitsnotiz nicht einfach Zeichen für Zeichen mit der Vorlage.
@@ -108,6 +178,8 @@ Bin bis zum 18.10. weg.
 Im zweiten Fall wurde der feste Textbestandteil verändert. Die Anwendung kann deshalb die definierte Standardvorlage wiederherstellen.
 
 ---
+
+<a id="abschnitt-6"></a>
 
 ### Schutz aktiver Abwesenheitsnotizen
 
@@ -139,6 +211,8 @@ Damit soll verhindert werden, dass eine aktuell verwendete oder bereits geplante
 
 ---
 
+<a id="abschnitt-7"></a>
+
 ### Getrennte Prüfung von intern und extern
 
 Interne und externe automatische Antworten werden unabhängig voneinander geprüft.
@@ -155,6 +229,8 @@ In diesem Fall muss nur die externe Vorlage korrigiert werden.
 Die interne Abwesenheitsnotiz bleibt unverändert.
 
 ---
+
+<a id="abschnitt-8"></a>
 
 ## Dry-Run / Testmodus
 
@@ -177,6 +253,8 @@ Dadurch kann die Konfiguration vor der produktiven Aktivierung überprüft werde
 
 ---
 
+<a id="abschnitt-9"></a>
+
 ## Mailbox-Ausnahmen
 
 Bestimmte Postfächer können von der Verarbeitung ausgeschlossen werden.
@@ -195,9 +273,11 @@ Damit können beispielsweise Sonderpostfächer oder Postfächer mit individuelle
 
 ---
 
+<a id="abschnitt-10"></a>
+
 ## Automatischer Betrieb
 
-Die Anwendung besteht aus zwei wesentlichen Komponenten:
+Admin-Anwendung und Windows-Dienst übernehmen Konfiguration und automatische Verarbeitung. Ergänzend stellt die Tray-Anwendung den schnellen Zugriff über die Taskleiste bereit:
 
 ```text
 AbwesenheitsManager.Admin
@@ -213,6 +293,8 @@ AbwesenheitsManager.Service
         ▼
 Exchange Online
 ```
+
+<a id="abschnitt-11"></a>
 
 ### Admin-Anwendung
 
@@ -234,6 +316,21 @@ Unter anderem können dort verwaltet werden:
 - Dry-Run
 - Zertifikatsstatus
 
+<a id="abschnitt-12"></a>
+
+### Tray-Anwendung
+
+`AbwesenheitsManager.Tray` läuft im angemeldeten Benutzerkonto unabhängig vom Windows-Dienst.
+
+- Eigenes Programmicon mit grüner, gelber, roter oder grauer Statusmarkierung.
+- Anzeige des Dienststatus sowie der letzten und nächsten Prüfung.
+- Doppelklick öffnet die Admin-Oberfläche.
+- **Jetzt prüfen** öffnet die manuelle Laufauswahl der Admin-App.
+- **Beenden** schließt ausschließlich das Tray, niemals den Windows-Dienst.
+- Benutzerautostart ist in der Admin-App ein- und ausschaltbar.
+
+<a id="abschnitt-13"></a>
+
 ### Windows-Dienst
 
 Der eigentliche automatische Betrieb erfolgt über einen Windows-Dienst.
@@ -251,6 +348,8 @@ die Postfächer überprüfen.
 Das Prüfintervall ist konfigurierbar.
 
 ---
+
+<a id="abschnitt-14"></a>
 
 ## Microsoft 365 / Exchange Online
 
@@ -282,6 +381,8 @@ Zusätzlich müssen passende Exchange-Verwaltungsrechte eingerichtet werden.
 
 ---
 
+<a id="abschnitt-15"></a>
+
 ## Zertifikatsauthentifizierung
 
 Die Anwendung unterstützt die Verwaltung eines Zertifikats für die Exchange-Online-Anmeldung.
@@ -306,6 +407,8 @@ Die öffentliche `.cer`-Datei wird anschließend in der entsprechenden Entra-App
 
 ---
 
+<a id="abschnitt-16"></a>
+
 ### Zertifikatsüberwachung
 
 Die Anwendung überwacht die Restlaufzeit des verwendeten Zertifikats.
@@ -328,6 +431,8 @@ Das Exchange-Zertifikat läuft in 30 Tagen ab.
 
 ---
 
+<a id="abschnitt-17"></a>
+
 ## SMTP-Benachrichtigungen
 
 Die Anwendung kann Administratoren über wichtige Ereignisse per SMTP informieren.
@@ -348,6 +453,8 @@ Beispielsweise kann bei einem ablaufenden Zertifikat automatisch eine Nachricht 
 
 ---
 
+<a id="abschnitt-18"></a>
+
 ### Sammelbenachrichtigungen
 
 Um unnötige E-Mail-Mengen zu vermeiden, werden Fehler eines Durchlaufs gesammelt.
@@ -357,7 +464,7 @@ Statt für jedes Postfach eine einzelne Nachricht zu senden, erhält der Adminis
 Beispiel:
 
 ```text
-Abwesenheits Manager
+AbwesenheitsManager
 
 Postfächer geprüft: 84
 Fehler: 3
@@ -370,6 +477,8 @@ Fehler:
 ```
 
 ---
+
+<a id="abschnitt-19"></a>
 
 ## Sichere Speicherung von SMTP-Zugangsdaten
 
@@ -384,6 +493,8 @@ DataProtectionScope.LocalMachine
 Dadurch ist das gespeicherte Geheimnis an den jeweiligen Windows-Rechner gebunden.
 
 ---
+
+<a id="abschnitt-20"></a>
 
 ## Logging
 
@@ -431,6 +542,8 @@ beziehungsweise:
 
 ---
 
+<a id="abschnitt-21"></a>
+
 ## Konfigurationsdaten
 
 Die Anwendungsdaten werden standardmäßig unter:
@@ -457,6 +570,8 @@ AbwesenheitsManager
 
 ---
 
+<a id="abschnitt-22"></a>
+
 ## Projektstruktur
 
 Das Projekt ist in mehrere Komponenten aufgeteilt.
@@ -468,12 +583,16 @@ AbwesenheitsManager.sln
 │
 ├── AbwesenheitsManager.Service
 │
+├── AbwesenheitsManager.Tray
+│
 ├── AbwesenheitsManager.Core
 │
 ├── AbwesenheitsManager.Exchange
 │
 └── AbwesenheitsManager.Tests
 ```
+
+<a id="abschnitt-23"></a>
 
 ### AbwesenheitsManager.Admin
 
@@ -489,6 +608,8 @@ Aufgaben:
 - Testläufe
 - Statusanzeige
 
+<a id="abschnitt-24"></a>
+
 ### AbwesenheitsManager.Service
 
 Windows-Hintergrunddienst.
@@ -500,6 +621,8 @@ Aufgaben:
 - Zertifikatsüberwachung
 - Fehlerbehandlung
 - SMTP-Warnmeldungen
+
+<a id="abschnitt-25"></a>
 
 ### AbwesenheitsManager.Core
 
@@ -515,6 +638,8 @@ Enthält unter anderem:
 - Vorlagenprüfung
 - Variablenlogik
 
+<a id="abschnitt-26"></a>
+
 ### AbwesenheitsManager.Exchange
 
 Exchange-spezifische Verarbeitung.
@@ -528,11 +653,15 @@ Unter anderem:
 - Änderung von Abwesenheitsvorlagen
 - Ergebniszusammenfassung
 
+<a id="abschnitt-27"></a>
+
 ### AbwesenheitsManager.Tests
 
 Lokale Regressionstests für zentrale Schutzmechanismen und Vorlagenlogik.
 
 ---
+
+<a id="abschnitt-28"></a>
 
 ## Technologien
 
@@ -542,6 +671,7 @@ Das Projekt verwendet unter anderem:
 .NET 9
 C#
 WPF
+Windows Forms (Tray)
 Windows Services
 PowerShell 7
 ExchangeOnlineManagement
@@ -555,6 +685,8 @@ Regex
 ```
 
 ---
+
+<a id="abschnitt-29"></a>
 
 ## Voraussetzungen
 
@@ -581,39 +713,319 @@ Für SMTP-Benachrichtigungen wird zusätzlich ein erreichbarer SMTP-Server bzw. 
 
 ---
 
+<a id="abschnitt-30"></a>
+
+## Installation, PowerShell 7 und Build
+
+<a id="abschnitt-31"></a>
+
+### 1. Quellcode entpacken und Solution-Ordner finden
+
+Die ZIP-Datei vollständig entpacken. Der **Solution-Ordner** ist der Ordner, in dem die Datei `AbwesenheitsManager.sln` liegt. Er enthält auch den Ordner `Scripts` und die einzelnen Projektordner.
+
+```text
+AbwesenheitsManager
+├── AbwesenheitsManager.sln
+├── global.json
+├── Scripts
+│   ├── Build-Help.ps1
+│   ├── Publish.ps1
+│   └── Install-Service.ps1
+├── AbwesenheitsManager.Admin
+├── AbwesenheitsManager.Service
+└── AbwesenheitsManager.Tray
+```
+
+Alle folgenden Projektbefehle werden in diesem Solution-Ordner ausgeführt, nicht innerhalb der ZIP und nicht im Ordner `C:\Windows\System32`.
+
+<a id="abschnitt-32"></a>
+
+### 2. PowerShell-Version prüfen
+
+Im geöffneten PowerShell-Fenster eingeben:
+
+```powershell
+$PSVersionTable.PSVersion
+```
+
+- **Major = 5:** Windows PowerShell 5.1.
+- **Major = 7:** PowerShell 7.
+
+PowerShell 7 wird zusätzlich zu Windows PowerShell 5.1 installiert. Ein bereits geöffnetes 5.1-Fenster wechselt durch die Installation nicht auf Version 7. Die Programme heißen `powershell.exe` beziehungsweise `pwsh.exe`.
+
+<a id="abschnitt-33"></a>
+
+### 3. PowerShell 7 installieren
+
+Im vorhandenen PowerShell-Fenster ausführen:
+
+```powershell
+winget install --id Microsoft.PowerShell --exact --source winget
+```
+
+Die Installation abschließen und das Terminal danach neu öffnen. Den registrierten Installationsstand prüfen:
+
+```powershell
+winget list --id Microsoft.PowerShell
+```
+
+Diese Ausgabe bestätigt die Installation, nicht die Version des geöffneten Fensters. Dafür weiterhin `$PSVersionTable.PSVersion` verwenden.
+
+Wenn `winget` fehlt, eine passende Windows-Installation aus der [offiziellen PowerShell-Installationsanleitung von Microsoft](https://learn.microsoft.com/de-de/powershell/scripting/install/installing-powershell-on-windows) verwenden. Dort sind auch die unterschiedlichen Installationsarten beschrieben.
+
+<a id="abschnitt-34"></a>
+
+### 4. PowerShell 7 öffnen oder auffinden
+
+Zuerst versuchen:
+
+```powershell
+pwsh -NoProfile
+```
+
+Wird `pwsh` nicht gefunden, den Installationspfad prüfen. Folgende Kandidaten decken die hier verwendeten Installationsorte ab:
+
+```powershell
+$ps7Candidates = @(
+    "$env:ProgramFiles\PowerShell\7\pwsh.exe"
+    "$env:LOCALAPPDATA\Microsoft\WindowsApps\pwsh.exe"
+    "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe\pwsh.exe"
+)
+
+$ps7Candidates | Where-Object { Test-Path -LiteralPath $_ }
+```
+
+Einen **tatsächlich gefundenen Pfad** starten. Beispiele, abhängig von der Installation:
+
+```powershell
+& "$env:ProgramFiles\PowerShell\7\pwsh.exe" -NoProfile
+```
+
+oder:
+
+```powershell
+& "$env:LOCALAPPDATA\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe\pwsh.exe" -NoProfile
+```
+
+Falls keiner der Kandidaten gefunden wird:
+
+```powershell
+where.exe /R "$env:LOCALAPPDATA" pwsh.exe
+where.exe /R "$env:ProgramFiles" pwsh.exe
+```
+
+Die Suche kann dauern. Einen gefundenen vollständigen Pfad mit `&` und Anführungszeichen starten. Nicht einfach `powershell 7` eingeben: Das startet Windows PowerShell mit einem Argument und wählt nicht PowerShell 7 aus.
+
+Nach dem Start nochmals prüfen:
+
+```powershell
+$PSVersionTable.PSVersion
+```
+
+Erst mit **Major = 7** fortfahren. Wird eine vorhandene WindowsApps-Verknüpfung nicht ausgeführt, die genaue Fehlermeldung prüfen; ein gefundener Alias allein bestätigt noch keinen erfolgreichen Programmstart.
+
+<a id="abschnitt-35"></a>
+
+### 5. .NET SDK prüfen
+
+Der Quellstand verwendet `.NET 9` und legt in `global.json` SDK `9.0.300` mit `rollForward: latestPatch` fest. Benötigt wird daher ein SDK aus der Reihe **9.0.3xx**, beispielsweise `9.0.318`. Eine allein installierte .NET-Laufzeit reicht zum Bauen nicht aus.
+
+Installierte SDKs anzeigen:
+
+```powershell
+dotnet --list-sdks
+```
+
+Für den Build über die Kommandozeile ist Visual Studio nicht erforderlich. Für die Arbeit in Visual Studio die oben genannten Entwicklungsvoraussetzungen installieren. Bei einer Meldung zum fehlenden SDK zuerst `global.json` und die installierte SDK-Liste vergleichen.
+
+<a id="abschnitt-36"></a>
+
+### 6. In den Solution-Ordner wechseln
+
+Den tatsächlichen Pfad des entpackten Ordners einsetzen. Beispiel:
+
+```powershell
+Set-Location -LiteralPath 'C:\Projekte\AbwesenheitsManager'
+```
+
+Die Anführungszeichen sind auch für Pfade mit Leerzeichen oder `C#` geeignet. Anschließend prüfen:
+
+```powershell
+Test-Path -LiteralPath '.\AbwesenheitsManager.sln'
+Test-Path -LiteralPath '.\Scripts\Publish.ps1'
+```
+
+Beide Befehle müssen `True` ausgeben.
+
+<a id="abschnitt-37"></a>
+
+### 7. Alle Programme in einer Ausführung erstellen
+
+In **PowerShell 7** im Solution-Ordner ausführen:
+
+```powershell
+.\Scripts\Publish.ps1
+```
+
+Dieser eine Aufruf:
+
+1. erzeugt das lokale HTML-Handbuch aus der README,
+2. baut und veröffentlicht die Admin-Anwendung,
+3. baut und veröffentlicht den Windows-Dienst,
+4. baut und veröffentlicht die Tray-Anwendung.
+
+Die Projekte müssen nicht einzeln erstellt werden. Der Vorgang benötigt beim erstmaligen Herunterladen der Pakete Internetzugriff und kann einige Minuten dauern. Bei einem Fehler die vollständige Fehlermeldung beachten; möglicherweise wurden dann erst einige der Programme erstellt.
+
+Die fertigen Ausgaben liegen anschließend hier:
+
+```text
+publish
+├── Admin
+│   ├── AbwesenheitsManager.Admin.exe
+│   ├── Help
+│   └── weitere benötigte Dateien
+├── Service
+│   ├── AbwesenheitsManager.Service.exe
+│   └── weitere benötigte Dateien
+└── Tray
+    ├── AbwesenheitsManager.Tray.exe
+    └── weitere benötigte Dateien
+```
+
+Das Skript veröffentlicht für **Windows x64** mit enthaltener .NET-Laufzeit. **PowerShell 7 und das ExchangeOnlineManagement-Modul sind darin nicht enthalten** und werden für den Betrieb separat benötigt.
+
+Alternativ kann das Skript aus einem älteren PowerShell-Fenster ausdrücklich mit PowerShell 7 gestartet werden, sofern `pwsh` gefunden wird:
+
+```powershell
+pwsh -NoProfile -File .\Scripts\Publish.ps1
+```
+
+<a id="abschnitt-38"></a>
+
+### 8. Optional: Solution bauen und Schutztests ausführen
+
+Für einen Entwicklungsbuild ohne Veröffentlichung:
+
+```powershell
+dotnet build .\AbwesenheitsManager.sln -c Release
+```
+
+Die vorhandenen lokalen Tests ausführen:
+
+```powershell
+dotnet run --project .\AbwesenheitsManager.Tests -c Release
+.\Scripts\Test-Guards.ps1
+```
+
+Ein Build allein installiert keinen Dienst und aktiviert keinen Autostart. Für die gemeinsam bereitgestellten Admin-/Service-/Tray-Ordner den Publish-Aufruf aus Schritt 7 verwenden.
+
+<a id="abschnitt-39"></a>
+
+### 9. Programme bereitstellen und Tray starten
+
+Die **gesamten drei Ausgabeordner** `Admin`, `Service` und `Tray` aus `publish` gemeinsam an einen festen Installationsort kopieren. Die Ordner müssen nebeneinander liegen; nicht nur die EXE-Dateien kopieren.
+
+Beispiel:
+
+```text
+C:\Program Files\AbwesenheitsManager
+├── Admin
+├── Service
+└── Tray
+```
+
+Die Admin-App über `Admin\AbwesenheitsManager.Admin.exe` öffnen und konfigurieren. Für das Tray-Symbol `Tray\AbwesenheitsManager.Tray.exe` im normalen Benutzerkonto starten. Das Symbol erscheint neben der Uhr oder im Überlaufmenü der Taskleiste.
+
+In der Admin-App unter **Betrieb → Tray-Anwendung** den Schalter **Tray-Symbol bei der Anmeldung dieses Kontos starten** setzen und **Tray-Autostart übernehmen** anklicken. Vorher den endgültigen Installationsort festlegen, da der Autostart einen absoluten Pfad speichert.
+
+Der Schalter gilt für das in der Admin-App angezeigte Benutzerkonto. Wenn die Admin-App mit Zugangsdaten eines anderen Administrators geöffnet wurde, den Autostart im gewünschten normalen Benutzerkonto setzen:
+
+```powershell
+.\Scripts\Set-TrayAutostart.ps1 -TrayPath 'C:\Program Files\AbwesenheitsManager\Tray\AbwesenheitsManager.Tray.exe'
+```
+
+Der Publish-Aufruf installiert den Windows-Dienst nicht. Die Dienstinstallation erfolgt separat in einer **als Administrator geöffneten PowerShell** aus dem Solution-Ordner:
+
+```powershell
+.\Scripts\Install-Service.ps1 -ServiceDirectory 'C:\Program Files\AbwesenheitsManager\Service'
+```
+
+Das Installationsskript startet den Dienst noch nicht. Erst die Konfiguration und den Dry-Run prüfen und anschließend starten:
+
+```powershell
+Start-Service AbwesenheitsManager
+```
+
+Der für den Dienst konfigurierte PowerShell-Pfad muss unter dessen Konto `LocalSystem` nutzbar sein. Ein benutzerspezifischer WindowsApps-Alias, der beim manuellen Build funktioniert, ist dafür kein ausreichender Nachweis. Auf dem Diensthost eine für den Dienst zugängliche PowerShell-Installation und das benötigte Exchange-Modul bereitstellen und den vollständigen PowerShell-Pfad in der Admin-App hinterlegen.
+
+<a id="abschnitt-40"></a>
+
+### Häufige Fehlermeldungen
+
+| Meldung oder Verhalten | Ursache und nächster Schritt |
+| --- | --- |
+| `Build-Help.ps1` benötigt PowerShell 7, geöffnet ist 5.1 | PowerShell 7 ausdrücklich über `pwsh.exe` starten und die Version erneut prüfen. |
+| `pwsh` wurde nicht gefunden | Neues Terminal öffnen; falls weiterhin unbekannt, die Pfadprüfung aus Schritt 4 verwenden. |
+| WinGet zeigt Version 7, die Konsole zeigt Version 5 | Installation und geöffnete Sitzung sind unterschiedlich. Die bestehende 5.1-Sitzung wurde nicht aktualisiert. |
+| `C:\Program Files\PowerShell\7\pwsh.exe` fehlt | Eine andere Installationsart kann einen anderen Pfad verwenden. Vorhandene Pfade ermitteln, nicht denselben fehlenden Pfad wiederholt starten. |
+| `Publish.ps1` wurde nicht gefunden | In den Ordner mit `AbwesenheitsManager.sln` und `Scripts` wechseln. |
+| `dotnet` oder passendes SDK fehlt | .NET SDK gemäß `global.json` installieren; danach das Terminal neu öffnen. |
+| Skriptausführung ist deaktiviert | Ausführungsrichtlinien mit `Get-ExecutionPolicy -List` prüfen und die Vorgaben der eigenen IT beachten. Das ist ein anderes Problem als eine falsche PowerShell-Version. |
+| Tray zeigt einen unbekannten Status | Prüfen, ob der aktualisierte Dienst installiert ist und läuft; Publish allein startet ihn nicht. |
+
+---
+
+<a id="abschnitt-41"></a>
+
 ## Sicherheitskonzept
 
 Mehrere Schutzmechanismen sollen unbeabsichtigte Änderungen verhindern.
+
+<a id="abschnitt-42"></a>
 
 ### Aktive automatische Antworten
 
 `Enabled` und `Scheduled` werden grundsätzlich übersprungen.
 
+<a id="abschnitt-43"></a>
+
 ### Dry-Run
 
 Änderungen können zunächst ausschließlich simuliert werden.
+
+<a id="abschnitt-44"></a>
 
 ### Zweite Prüfung vor Änderungen
 
 Vor einem Schreibvorgang kann der Zustand eines Postfachs erneut geprüft werden.
 
+<a id="abschnitt-45"></a>
+
 ### Getrennte Vorlagenprüfung
 
 Interne und externe Texte werden unabhängig bewertet.
+
+<a id="abschnitt-46"></a>
 
 ### Zertifikatsauthentifizierung
 
 Es werden keine Microsoft-365-Benutzerkennwörter für den automatischen Betrieb benötigt.
 
+<a id="abschnitt-47"></a>
+
 ### DPAPI
 
 SMTP-Geheimnisse werden nicht im Klartext gespeichert.
+
+<a id="abschnitt-48"></a>
 
 ### Ausschlussliste
 
 Sonderpostfächer können von der Verarbeitung ausgenommen werden.
 
 ---
+
+<a id="abschnitt-49"></a>
 
 ## Bekannte technische Grenze
 
@@ -626,6 +1038,8 @@ Die Anwendung reduziert dieses Risiko durch erneute Prüfungen unmittelbar vor S
 Für eine vollständig schreibfreie Prüfung steht der Dry-Run-Modus zur Verfügung.
 
 ---
+
+<a id="abschnitt-50"></a>
 
 ## Beispielhafter Ablauf
 
@@ -665,6 +1079,8 @@ interne/externe Vorlage prüfen
 
 ---
 
+<a id="abschnitt-51"></a>
+
 ## Empfohlene Inbetriebnahme
 
 1. Entra-App konfigurieren
@@ -683,6 +1099,8 @@ interne/externe Vorlage prüfen
 
 ---
 
+<a id="abschnitt-52"></a>
+
 ## Status des Projekts
 
 Das Projekt ist als internes Administrationswerkzeug für Microsoft-365-/Exchange-Online-Umgebungen konzipiert.
@@ -691,12 +1109,16 @@ Vor einem produktiven Rollout sollte die Anwendung immer zunächst mit einem Tes
 
 ---
 
+<a id="abschnitt-53"></a>
+
 ## Lizenz
 
 MIT
 
 
 ---
+
+<a id="abschnitt-54"></a>
 
 ## Haftungshinweis
 
@@ -711,3 +1133,4 @@ Vor dem produktiven Einsatz sollten:
 - geeignete Sicherungs- und Betriebsprozesse festgelegt werden
 
 Der Einsatz erfolgt in Verantwortung des jeweiligen Administrators.
+
